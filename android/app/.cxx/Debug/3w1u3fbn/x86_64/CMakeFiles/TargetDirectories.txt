@@ -1,0 +1,2 @@
+D:/skol/mobile programming/judging_app/android/app/.cxx/Debug/3w1u3fbn/x86_64/CMakeFiles/edit_cache.dir
+D:/skol/mobile programming/judging_app/android/app/.cxx/Debug/3w1u3fbn/x86_64/CMakeFiles/rebuild_cache.dir

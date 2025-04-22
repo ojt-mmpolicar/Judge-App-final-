@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "249570305920",
+    "firebase_url": "https://judging-app-749b1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "judging-app-749b1",
+    "storage_bucket": "judging-app-749b1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249570305920:android:9d77851d27bf10113d8365",
+        "android_client_info": {
+          "package_name": "com.example.judging_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAz8cE9uLls6lYXdT5EJX1B4AA7grSB4vU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
