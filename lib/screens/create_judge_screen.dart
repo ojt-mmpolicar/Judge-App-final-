@@ -50,23 +50,107 @@ class _CreateJudgeScreenState extends State<CreateJudgeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Judge Account')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Create Judge Account', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _judgeUsernameController,
-              decoration: const InputDecoration(labelText: 'Judge Username'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _createJudgeAccount,
-              child: const Text('Create Judge'),
-            ),
-          ],
+      appBar: AppBar(
+        title: const Text(
+          'Create Judge Account',
+          style:
+              TextStyle(color: Color(0xFF1C1C1C), fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF1C1C1C)),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Create Judge Account',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFEAEAEA),
+                  shadows: [
+                    Shadow(
+                      offset: Offset(0, 2),
+                      blurRadius: 10,
+                      color: Color(0xFF08D9D6),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: const BorderSide(color: Color(0xFF08D9D6), width: 1.5),
+                ),
+                color: Colors.white.withOpacity(0.1),
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Judge Username',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEAEAEA),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _judgeUsernameController,
+                        decoration: InputDecoration(
+                          labelText: 'Enter Judge Username',
+                          labelStyle: const TextStyle(color: Color(0xFF8C8C8C)),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.1),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide:
+                                const BorderSide(color: Color(0xFF08D9D6)),
+                          ),
+                        ),
+                        style: const TextStyle(color: Color(0xFFEAEAEA)),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF08D9D6),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              side: const BorderSide(color: Color(0xFF08D9D6)),
+                            ),
+                            elevation: 10,
+                            shadowColor:
+                                const Color(0xFF08D9D6).withOpacity(0.5),
+                          ),
+                          onPressed: _createJudgeAccount,
+                          child: const Text('Create Judge'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
