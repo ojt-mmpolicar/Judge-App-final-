@@ -1,2 +1,0 @@
-D:/skol/mobile programming/judging_app/android/app/.cxx/Debug/3w1u3fbn/arm64-v8a/CMakeFiles/edit_cache.dir
-D:/skol/mobile programming/judging_app/android/app/.cxx/Debug/3w1u3fbn/arm64-v8a/CMakeFiles/rebuild_cache.dir

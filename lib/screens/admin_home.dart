@@ -43,51 +43,46 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Darker color palette
+    const indigo = Color(0xFF232B6B); // much darker indigo
+    const softBlue = Color(0xFF3A4A7A); // deeper blue
+    const coral = Color(0xFFB83232); // darker coral/red
+    const offWhite = Color(0xFFE5E7EB); // darker off-white (light gray)
+    const charcoalGray = Color(0xFF181A20); // almost black
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           'Admin Home',
           style: TextStyle(
-            color: Color(0xFFEAEAEA), // Light text color for contrast
+            fontFamily: 'Poppins',
+            color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 20,
-            shadows: [
-              Shadow(
-                offset: Offset(0, 2),
-                blurRadius: 10,
-                color:
-                    Color(0xFF08D9D6), // Bright Cyan glow for better visibility
-              ),
-            ],
+            fontSize: 22,
+            letterSpacing: 1.2,
           ),
         ),
-        backgroundColor:
-            const Color(0xFF0F0F0F), // Dark background for contrast
-        elevation: 4, // Add slight shadow for separation from the background
-        iconTheme:
-            const IconThemeData(color: Color(0xFFEAEAEA)), // Match icon color
+        backgroundColor: indigo,
+        elevation: 4,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: Drawer(
         child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF0F0F0F), // Dark background
-                Color(0xFF08D9D6) // Bright Cyan
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          color: offWhite,
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
-              const DrawerHeader(
+              DrawerHeader(
                 decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
+                  color: indigo,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(32),
+                    bottomRight: Radius.circular(32),
+                  ),
+                  image: const DecorationImage(
                     image: AssetImage('assets/admin_banner.jpg'),
                     fit: BoxFit.cover,
+                    opacity: 0.25,
                   ),
                 ),
                 child: Align(
@@ -95,14 +90,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   child: Text(
                     'Admin Menu',
                     style: TextStyle(
-                      color: Color(0xFFEAEAEA),
-                      fontSize: 24,
+                      color: Colors.white,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
                       shadows: [
                         Shadow(
                           offset: Offset(0, 2),
                           blurRadius: 10,
-                          color: Color(0xFF08D9D6), // Bright Cyan glow
+                          color: softBlue.withOpacity(0.7),
                         ),
                       ],
                     ),
@@ -110,114 +106,119 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 ),
               ),
               ListTile(
-                leading:
-                    const Icon(Icons.event, color: Color(0xFF08D9D6), size: 28),
+                leading: Icon(Icons.event, color: indigo, size: 28),
                 title: const Text('Create Event',
-                    style: TextStyle(color: Color(0xFFEAEAEA))),
+                    style: TextStyle(
+                        color: charcoalGray,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500)),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const CreateEventScreen()),
                   );
                 },
+                hoverColor: softBlue.withOpacity(0.2),
               ),
               ListTile(
-                leading: const Icon(Icons.person_add,
-                    color: Color(0xFF08D9D6), size: 28),
+                leading: Icon(Icons.person_add, color: indigo, size: 28),
                 title: const Text('Create Judge Account',
-                    style: TextStyle(color: Color(0xFFEAEAEA))),
+                    style: TextStyle(
+                        color: charcoalGray,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500)),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const CreateJudgeScreen()),
                   );
                 },
+                hoverColor: softBlue.withOpacity(0.2),
               ),
               ListTile(
-                leading:
-                    const Icon(Icons.score, color: Color(0xFF08D9D6), size: 28),
+                leading: Icon(Icons.score, color: indigo, size: 28),
                 title: const Text('Judge Scores',
-                    style: TextStyle(color: Color(0xFFEAEAEA))),
+                    style: TextStyle(
+                        color: charcoalGray,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500)),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const JudgeScoresScreen()),
                   );
                 },
+                hoverColor: softBlue.withOpacity(0.2),
               ),
-              const Divider(), // Add a divider for better UI
+              const Divider(),
               ListTile(
-                leading: const Icon(Icons.exit_to_app,
-                    color: Color(0xFF08D9D6), size: 28),
+                leading: Icon(Icons.exit_to_app, color: coral, size: 28),
                 title: const Text('Log Out',
-                    style: TextStyle(color: Color(0xFFEAEAEA))),
-                onTap: _showExitConfirmationDialog, // Show confirmation dialog
+                    style: TextStyle(
+                        color: charcoalGray,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500)),
+                onTap: _showExitConfirmationDialog,
+                hoverColor: coral.withOpacity(0.08),
               ),
             ],
           ),
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 15, 15, 15), // Dark background
-              Color.fromARGB(255, 8, 217, 214) // Bright Cyan
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
+        color: offWhite,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(25),
-                  borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: const Color(0xFF08D9D6), width: 1.5),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: indigo, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF08D9D6).withAlpha(128),
-                      blurRadius: 20,
-                      spreadRadius: 5,
+                      color: softBlue.withOpacity(0.18),
+                      blurRadius: 24,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(20),
-                child: const Icon(
+                padding: const EdgeInsets.all(28),
+                child: Icon(
                   Icons.admin_panel_settings,
-                  size: 120,
-                  color: Color(0xFFEAEAEA),
+                  size: 110,
+                  color: indigo,
                   shadows: [
                     Shadow(
                       offset: Offset(0, 2),
-                      blurRadius: 20,
-                      color: Color(0xFF08D9D6),
+                      blurRadius: 16,
+                      color: softBlue.withOpacity(0.7),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
+              const SizedBox(height: 28),
+              Text(
                 'Welcome to Admin Home',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFEAEAEA),
+                  color: charcoalGray,
+                  fontFamily: 'Poppins',
+                  letterSpacing: 1.1,
                   shadows: [
                     Shadow(
                       offset: Offset(0, 2),
                       blurRadius: 10,
-                      color: Color(0xFF08D9D6),
+                      color: softBlue.withOpacity(0.5),
                     ),
                   ],
                 ),

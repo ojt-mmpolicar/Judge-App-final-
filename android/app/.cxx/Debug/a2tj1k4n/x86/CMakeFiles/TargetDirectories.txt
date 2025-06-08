@@ -1,2 +1,0 @@
-C:/Users/polic/StudioProjects/judging_app - sowper gana/android/app/.cxx/Debug/a2tj1k4n/x86/CMakeFiles/edit_cache.dir
-C:/Users/polic/StudioProjects/judging_app - sowper gana/android/app/.cxx/Debug/a2tj1k4n/x86/CMakeFiles/rebuild_cache.dir

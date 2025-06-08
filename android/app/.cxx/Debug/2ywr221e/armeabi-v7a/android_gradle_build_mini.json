@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\flutter\\src\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\polic\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\polic\\StudioProjects\\1\\FINAL NA\\judging_app - sowper gana-20250604T151620Z-1-001\\judging_app - sowper gana\\android\\app\\.cxx\\Debug\\2ywr221e\\armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\polic\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\polic\\StudioProjects\\1\\FINAL NA\\judging_app - sowper gana-20250604T151620Z-1-001\\judging_app - sowper gana\\android\\app\\.cxx\\Debug\\2ywr221e\\armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
