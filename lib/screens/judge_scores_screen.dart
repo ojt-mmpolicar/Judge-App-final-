@@ -445,7 +445,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
     const charcoalGray = Color(0xFF2C3E50);
     return [
       const DataColumn(
-          label: Text('Contestant', style: TextStyle(color: charcoalGray))),
+          label: Text('CANDIDATES', style: TextStyle(color: charcoalGray))),
       ...judgeList.map((judge) => DataColumn(
             label: Text(
               criteriaToUsernames[judge] ?? judge,
@@ -515,7 +515,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
     const charcoalGray = Color(0xFF2C3E50);
     return [
       const DataColumn(
-          label: Text('Contestant', style: TextStyle(color: charcoalGray))),
+          label: Text('CANDIDATES', style: TextStyle(color: charcoalGray))),
       ...judgeList.map((judge) => DataColumn(
             label: Text(
               criteriaToUsernames[judge] ?? judge,
@@ -555,6 +555,8 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
       }
     }
 
+    // Build DataRows: each row is a contestant, columns are judge rankings
+    // Also compute total of ranks, average (from scores), and overall rank for each contestant
     final List<Map<String, dynamic>> rankedRows =
         contestantList.map((contestant) {
       int totalRank = 0;
@@ -578,7 +580,14 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
       };
     }).toList();
 
-    rankedRows.sort((a, b) => a['totalRank'].compareTo(b['totalRank']));
+    // Sort by totalRank ascending, and if tie, by averageScore descending
+    rankedRows.sort((a, b) {
+      final cmp = a['totalRank'].compareTo(b['totalRank']);
+      if (cmp != 0) return cmp;
+      // If tie, higher averageScore gets better rank (lower index)
+      return (b['averageScore'] as double)
+          .compareTo(a['averageScore'] as double);
+    });
     for (int i = 0; i < rankedRows.length; i++) {
       rankedRows[i]['rank'] = i + 1;
     }
@@ -622,26 +631,18 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
     try {
       final pdf = pw.Document();
 
-      // --- Prepare Main Scores Table (same as on screen) ---
-      // Get all judges and contestants
-      final Set<String> judgeSet = {};
-      for (final contestantScores in scores.values) {
-        if (contestantScores is Map) {
-          judgeSet.addAll(contestantScores.keys);
-        }
-      }
-      final List<String> judgeList = judgeSet.toList();
-      final List<String> contestantList = scores.keys.toList();
+      // Use the same logic as the UI for fetching judges and contestants
+      final judgeList = _getJudgeList(eventName);
+      final contestantList = _getContestantList(eventName);
 
-      // Main Scores Table headers and data
+      // --- Main Scores Table (same as _buildTableColumns/_buildTableRows) ---
       final mainHeaders = [
-        'Contestant',
+        'CANDIDATES',
         ...judgeList.map((judge) => criteriaToUsernames[judge] ?? judge),
         'Total',
         'Rank'
       ];
 
-      // Calculate total scores and ranks for contestants
       final List<Map<String, dynamic>> rankedScores =
           contestantList.map((contestant) {
         final judgeScores = scores[contestant] ?? {};
@@ -672,8 +673,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
         ];
       }).toList();
 
-      // --- Prepare Judges' Rankings Table (same as on screen) ---
-      // For each judge, compute the ranking of all contestants
+      // --- Judges' Rankings Table (same as _buildJudgeTableColumns/_buildJudgeRankingRows) ---
       final Map<String, Map<String, int>> judgeRanks = {};
       for (final judge in judgeList) {
         final List<Map<String, dynamic>> judgeContestantScores =
@@ -693,33 +693,45 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
         }
       }
 
-      // Build DataRows: each row is a contestant, columns are judge rankings
-      // Also compute total of ranks and overall rank for each contestant
       final List<Map<String, dynamic>> rankedRows =
           contestantList.map((contestant) {
         int totalRank = 0;
         List<String> rankStrings = [];
+        double totalScore = 0.0;
+        int judgeCount = 0;
         for (final judge in judgeList) {
           final rank = judgeRanks[judge]?[contestant] ?? 0;
           totalRank += rank;
           rankStrings.add(rank != 0 ? _getOrdinalSuffix(rank) : '-');
+          final judgeScores = scores[contestant] ?? {};
+          totalScore += (judgeScores[judge] ?? 0.0) as double;
+          judgeCount++;
         }
+        double averageScore = judgeCount > 0 ? totalScore / judgeCount : 0.0;
         return {
           'contestant': contestant,
           'ranks': rankStrings,
           'totalRank': totalRank,
+          'averageScore': averageScore,
         };
       }).toList();
 
-      rankedRows.sort((a, b) => a['totalRank'].compareTo(b['totalRank']));
+      // Sort by totalRank ascending, and if tie, by averageScore descending
+      rankedRows.sort((a, b) {
+        final cmp = a['totalRank'].compareTo(b['totalRank']);
+        if (cmp != 0) return cmp;
+        return (b['averageScore'] as double)
+            .compareTo(a['averageScore'] as double);
+      });
       for (int i = 0; i < rankedRows.length; i++) {
         rankedRows[i]['rank'] = i + 1;
       }
 
       final judgeHeaders = [
-        'Contestant',
+        'CANDIDATES',
         ...judgeList.map((judge) => criteriaToUsernames[judge] ?? judge),
         'Total',
+        'Average',
         'Rank'
       ];
       final judgeData = rankedRows.map((row) {
@@ -727,6 +739,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
           row['contestant'],
           ...row['ranks'],
           row['totalRank'].toString(),
+          (row['averageScore'] as double).toStringAsFixed(2),
           row['rank'].toString(),
         ];
       }).toList();
