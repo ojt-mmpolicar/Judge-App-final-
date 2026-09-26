@@ -12,12 +12,11 @@ class JudgeScoresScreen extends StatefulWidget {
 }
 
 class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
-  // Darker color palette
-  static const indigo = Color(0xFF232B6B); // much darker indigo
-  static const softBlue = Color(0xFF3A4A7A); // deeper blue
-  static const coral = Color(0xFFB83232); // darker coral/red
-  static const offWhite = Color(0xFFE5E7EB); // darker off-white (light gray)
-  static const charcoalGray = Color(0xFF181A20); // almost black
+  static const indigo = _ScorePalette.primary;
+  static const softBlue = _ScorePalette.muted;
+  static const coral = _ScorePalette.danger;
+  static const offWhite = _ScorePalette.background;
+  static const charcoalGray = _ScorePalette.ink;
 
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
   Map<String, Map<String, Map<String, dynamic>>> eventScores = {};
@@ -101,169 +100,407 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Judge Scores',
+        title: Text(
+          selectedEvent == null ? 'Judge scores' : 'Event results',
           style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Poppins',
+            color: _ScorePalette.ink,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
           ),
         ),
-        backgroundColor: indigo,
-        elevation: 2,
-        iconTheme: const IconThemeData(color: Colors.white),
+        backgroundColor: const Color(0xFFF8FAFF),
+        foregroundColor: _ScorePalette.ink,
+        surfaceTintColor: const Color(0xFFF8FAFF),
+        toolbarHeight: 66,
+        titleSpacing: 0,
+        elevation: 0,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(height: 1, color: _ScorePalette.border),
+        ),
       ),
       backgroundColor: offWhite,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        padding: const EdgeInsets.all(24.0),
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: selectedEvent == null
-                ? _buildEventListUI(indigo, softBlue, coral, charcoalGray)
-                : _buildEventScoresUI(indigo, softBlue, coral, charcoalGray),
+      body: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          const Positioned(
+            top: -170,
+            right: -150,
+            child: _ScoreBackgroundOrb(size: 420),
           ),
-        ),
+          const Positioned(
+            bottom: -220,
+            left: -180,
+            child: _ScoreBackgroundOrb(size: 480),
+          ),
+          Positioned.fill(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final pagePadding = constraints.maxWidth < 700 ? 16.0 : 26.0;
+
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    pagePadding,
+                    24,
+                    pagePadding,
+                    34,
+                  ),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1320),
+                      child: selectedEvent == null
+                          ? _buildEventListUI(
+                              indigo,
+                              softBlue,
+                              coral,
+                              charcoalGray,
+                            )
+                          : _buildEventScoresUI(
+                              indigo,
+                              softBlue,
+                              coral,
+                              charcoalGray,
+                            ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: selectedEvent != null
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
               onPressed: () => _printEventScores(
                   selectedEvent!, eventScores[selectedEvent!]!),
-              backgroundColor: coral,
-              child: const Icon(Icons.print, color: Colors.white),
+              backgroundColor: _ScorePalette.primary,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.print_rounded),
+              label: const Text('Print Results'),
               tooltip: 'Print Scores',
             )
           : null,
     );
   }
 
-  // Updated event list with colored borders and modern cards
   Widget _buildEventListUI(
       Color indigo, Color softBlue, Color coral, Color charcoalGray) {
-    if (eventScores.isEmpty) {
-      return Center(
-        child: Text(
-          'No scores available',
-          style: TextStyle(
-            fontSize: 18,
-            color: charcoalGray,
-            fontFamily: 'Poppins',
-          ),
-        ),
-      );
-    }
+    final eventNames = eventScores.keys.toList()
+      ..sort((first, second) => first.toLowerCase().compareTo(
+            second.toLowerCase(),
+          ));
 
-    return ListView(
-      children: eventScores.keys.map((eventName) {
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: indigo, width: 2),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Judge Scores',
+            style: TextStyle(
+              color: _ScorePalette.ink,
+              fontSize: 30,
+              height: 1.15,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.7,
+            ),
           ),
-          color: Colors.white,
-          elevation: 6,
-          margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: ListTile(
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
-            leading: Icon(Icons.emoji_events, color: coral, size: 32),
-            title: Text(
-              eventName,
-              style: TextStyle(
-                fontSize: 20,
-                color: charcoalGray,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Poppins',
+          const SizedBox(height: 7),
+          const Text(
+            'View and manage scoring events.',
+            style: TextStyle(
+              color: _ScorePalette.muted,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 22),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1180),
+              child: SizedBox(
+                width: double.infinity,
+                child: _ScorePanel(
+                  child: eventNames.isEmpty
+                      ? const _EmptyScoresState()
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            if (constraints.maxWidth < 900) {
+                              return Column(
+                                children: eventNames.map((eventName) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: _buildEventMobileCard(eventName),
+                                  );
+                                }).toList(),
+                              );
+                            }
+
+                            return _buildEventTable(eventNames);
+                          },
+                        ),
+                ),
               ),
             ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.delete, color: coral, size: 26),
-                  tooltip: 'Delete Event',
-                  onPressed: () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        title: Row(
-                          children: [
-                            Icon(Icons.warning_amber_rounded,
-                                color: coral, size: 28),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'Delete Event',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ],
-                        ),
-                        content: Text(
-                          'Are you sure you want to delete "$eventName"? This cannot be undone.',
-                          style: const TextStyle(
-                              fontFamily: 'Poppins', fontSize: 16),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: coral,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
-                    if (confirm == true) {
-                      // Remove from Firebase
-                      await _database.child('scores/$eventName').remove();
-                      await _database.child('events/$eventName').remove();
-                      setState(() {
-                        eventScores.remove(eventName);
-                      });
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Event "$eventName" deleted')),
-                        );
-                      }
-                    }
-                  },
-                ),
-                Icon(Icons.arrow_forward_ios, color: softBlue, size: 24),
-              ],
-            ),
-            onTap: () {
-              setState(() {
-                selectedEvent = eventName;
-              });
-            },
-            hoverColor: softBlue.withOpacity(0.12),
           ),
-        );
-      }).toList(),
+        ],
+      ),
     );
   }
 
-  // Updated event scores UI with colored borders and modern tables
+  Widget _buildEventTable(List<String> eventNames) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: _ScorePalette.border),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          Container(
+            height: 46,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            color: const Color(0xFFF0F1FF),
+            child: const Row(
+              children: [
+                Expanded(flex: 5, child: _EventHeaderText('EVENT NAME')),
+                Expanded(flex: 2, child: _EventHeaderText('CONTESTANTS')),
+                Expanded(flex: 2, child: _EventHeaderText('JUDGES')),
+                Expanded(flex: 2, child: _EventHeaderText('STATUS')),
+                SizedBox(
+                  width: 150,
+                  child: _EventHeaderText('ACTIONS', centered: true),
+                ),
+              ],
+            ),
+          ),
+          for (final eventName in eventNames) _buildEventTableRow(eventName),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventTableRow(String eventName) {
+    final contestantCount = _getContestantList(eventName).length;
+    final judgeCount = _getJudgeList(eventName).length;
+
+    return Container(
+      constraints: const BoxConstraints(minHeight: 66),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: _ScorePalette.border),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 5,
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEFF1),
+                    borderRadius: BorderRadius.circular(11),
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events_rounded,
+                    color: _ScorePalette.danger,
+                    size: 21,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    eventName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: _ScorePalette.ink,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: _CountLabel(
+              icon: Icons.groups_2_rounded,
+              count: contestantCount,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: _CountLabel(
+              icon: Icons.person_rounded,
+              count: judgeCount,
+            ),
+          ),
+          const Expanded(flex: 2, child: _ScoresAvailableBadge()),
+          SizedBox(
+            width: 150,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => setState(() => selectedEvent = eventName),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, 40),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: const Text('View Scores'),
+                ),
+                IconButton(
+                  tooltip: 'Delete event',
+                  onPressed: () => _confirmDeleteEvent(eventName),
+                  style: IconButton.styleFrom(
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: _ScorePalette.danger,
+                    size: 20,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventMobileCard(String eventName) {
+    final contestantCount = _getContestantList(eventName).length;
+    final judgeCount = _getJudgeList(eventName).length;
+
+    return Material(
+      color: const Color(0xFFF8F9FF),
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => setState(() => selectedEvent = eventName),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            border: Border.all(color: _ScorePalette.border),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEFF1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.emoji_events_rounded,
+                  color: _ScorePalette.danger,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      eventName,
+                      style: const TextStyle(
+                        color: _ScorePalette.ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      '$contestantCount contestants  •  $judgeCount judges',
+                      style: const TextStyle(
+                        color: _ScorePalette.muted,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const _ScoresAvailableBadge(),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Delete event',
+                onPressed: () => _confirmDeleteEvent(eventName),
+                icon: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: _ScorePalette.danger,
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: _ScorePalette.primary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteEvent(String eventName) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: _ScorePalette.danger),
+            SizedBox(width: 10),
+            Text('Delete Event'),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to delete "$eventName"? This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: _ScorePalette.danger,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _database.child('scores/$eventName').remove();
+      await _database.child('events/$eventName').remove();
+      if (!mounted) return;
+      setState(() => eventScores.remove(eventName));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Event "$eventName" deleted')),
+      );
+    }
+  }
+
   Widget _buildEventScoresUI(
       Color indigo, Color softBlue, Color coral, Color charcoalGray) {
-    final scores = eventScores[selectedEvent] ?? {};
+    final contestantCount = _getContestantList(selectedEvent!).length;
+    final judgeCount = _getJudgeList(selectedEvent!).length;
 
     return SingleChildScrollView(
       child: Column(
@@ -272,137 +509,199 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
           Row(
             children: [
               IconButton(
-                icon: Icon(Icons.arrow_back, color: coral, size: 28),
-                onPressed: () {
-                  setState(() {
-                    selectedEvent = null;
-                  });
-                },
+                icon: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: _ScorePalette.primary,
+                ),
+                onPressed: () => setState(() => selectedEvent = null),
                 tooltip: 'Back to Events',
               ),
-              Text(
-                'Scores for $selectedEvent',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: charcoalGray,
-                  fontFamily: 'Poppins',
+              const SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Scores for $selectedEvent',
+                      style: const TextStyle(
+                        color: _ScorePalette.ink,
+                        fontSize: 28,
+                        height: 1.15,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.6,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    const Text(
+                      'Event results and ranking overview.',
+                      style: TextStyle(
+                        color: _ScorePalette.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          // Center the Judges' Rankings Table
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: _buildColoredTable(
-                  columns: _buildTableColumns(selectedEvent!),
-                  rows: _buildTableRows(selectedEvent!),
-                  title: 'Main Scores Table',
-                  indigo: indigo,
-                  softBlue: softBlue,
-                  coral: coral,
-                  charcoalGray: charcoalGray,
+          const SizedBox(height: 22),
+          _ScorePanel(
+            child: Wrap(
+              spacing: 18,
+              runSpacing: 14,
+              children: [
+                _ResultMetric(
+                  icon: Icons.groups_2_rounded,
+                  label: 'Total Candidates',
+                  value: '$contestantCount',
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          // Center the Main Scores Table
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Flexible(
-                child: _buildColoredTable(
-                  columns: _buildJudgeTableColumns(selectedEvent!),
-                  rows: _buildJudgeRankingRows(selectedEvent!),
-                  title: 'Judges\' Rankings Table',
-                  indigo: indigo,
-                  softBlue: softBlue,
-                  coral: coral,
-                  charcoalGray: charcoalGray,
+                _ResultMetric(
+                  icon: Icons.person_rounded,
+                  label: 'Judges',
+                  value: '$judgeCount',
                 ),
-              ),
-            ],
+                const _ResultMetric(
+                  icon: Icons.check_circle_rounded,
+                  label: 'Status',
+                  value: 'Scores available',
+                  isSuccess: true,
+                ),
+              ],
+            ),
           ),
+          const SizedBox(height: 18),
+          _buildColoredTable(
+            columns: _buildTableColumns(selectedEvent!),
+            rows: _buildTableRows(selectedEvent!),
+            title: 'Main Scores Table',
+            subtitle: 'Scores given by each judge, with totals and ranking.',
+            icon: Icons.emoji_events_rounded,
+            indigo: indigo,
+            softBlue: softBlue,
+            coral: coral,
+            charcoalGray: charcoalGray,
+          ),
+          const SizedBox(height: 18),
+          _buildColoredTable(
+            columns: _buildJudgeTableColumns(selectedEvent!),
+            rows: _buildJudgeRankingRows(selectedEvent!),
+            title: 'Judges\' Rankings Table',
+            subtitle:
+                'Rankings from each judge, with totals, averages, and final rank.',
+            icon: Icons.bar_chart_rounded,
+            indigo: indigo,
+            softBlue: softBlue,
+            coral: coral,
+            charcoalGray: charcoalGray,
+          ),
+          const SizedBox(height: 74),
         ],
       ),
     );
   }
 
-  // Modern colored DataTable with borders and header color
   Widget _buildColoredTable({
     required List<DataColumn> columns,
     required List<DataRow> rows,
     required String title,
+    required String subtitle,
+    required IconData icon,
     required Color indigo,
     required Color softBlue,
     required Color coral,
     required Color charcoalGray,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: indigo,
-            fontFamily: 'Poppins',
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: softBlue, width: 2),
-            borderRadius: BorderRadius.circular(18),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: softBlue.withOpacity(0.10),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+    return _ScorePanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F1FF),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: indigo, size: 24),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: charcoalGray,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: softBlue,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          margin: const EdgeInsets.only(bottom: 12),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 800),
-              child: DataTable(
-                columnSpacing: 40,
-                dataRowMinHeight: 56,
-                dataRowMaxHeight: 72,
-                columns: columns,
-                rows: rows,
-                headingRowColor:
-                    MaterialStateProperty.all(indigo.withOpacity(0.12)),
-                dataRowColor:
-                    MaterialStateProperty.all(softBlue.withOpacity(0.06)),
-                headingTextStyle: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: coral,
-                  fontFamily: 'Poppins',
-                ),
-                dataTextStyle: TextStyle(
-                  fontSize: 16,
-                  color: charcoalGray,
-                  fontFamily: 'Poppins',
-                ),
-                border: TableBorder.all(
-                  color: indigo,
-                  width: 1.5,
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.center,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: _ScorePalette.border),
+                borderRadius: BorderRadius.circular(14),
+                color: Colors.white,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 800),
+                  child: DataTable(
+                    columnSpacing: 38,
+                    dataRowMinHeight: 54,
+                    dataRowMaxHeight: 66,
+                    headingRowHeight: 48,
+                    columns: columns,
+                    rows: rows,
+                    headingRowColor: WidgetStatePropertyAll(
+                      indigo.withValues(alpha: 0.08),
+                    ),
+                    dataRowColor: const WidgetStatePropertyAll(Colors.white),
+                    headingTextStyle: TextStyle(
+                      color: charcoalGray,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    dataTextStyle: TextStyle(
+                      color: charcoalGray,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    border: const TableBorder(
+                      horizontalInside: BorderSide(
+                        color: _ScorePalette.border,
+                      ),
+                      verticalInside: BorderSide(
+                        color: _ScorePalette.border,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -415,11 +714,9 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
         criteriaToUsernames.keys.map((k) => k.toString()).toSet();
 
     for (final contestantScores in scores.values) {
-      if (contestantScores is Map) {
-        // Only add keys that are in the judges list (not contestant names)
-        judgeSet.addAll(contestantScores.keys
-            .where((k) => allJudgeUsernames.contains(k.toString())));
-      }
+      // Only add keys that are in the judges list (not contestant names)
+      judgeSet.addAll(contestantScores.keys
+          .where((k) => allJudgeUsernames.contains(k.toString())));
     }
     final judgeList = judgeSet.toList();
     judgeList.sort((a, b) => (criteriaToUsernames[a] ?? a)
@@ -502,10 +799,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
           totalScore.toStringAsFixed(2),
           style: const TextStyle(color: charcoalGray),
         )),
-        DataCell(Text(
-          rank.toString(),
-          style: const TextStyle(color: charcoalGray),
-        )),
+        DataCell(_RankBadge(rank: rank as int)),
       ]);
     }).toList();
   }
@@ -604,8 +898,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
           (row['averageScore'] as double).toStringAsFixed(2),
           style: const TextStyle(color: charcoalGray),
         )),
-        DataCell(Text(row['rank'].toString(),
-            style: const TextStyle(color: charcoalGray))),
+        DataCell(_RankBadge(rank: row['rank'] as int)),
       ]);
     }).toList();
   }
@@ -756,7 +1049,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
                     style: pw.TextStyle(
                         fontSize: 20, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 16),
-                pw.Table.fromTextArray(
+                pw.TableHelper.fromTextArray(
                   headers: mainHeaders,
                   data: mainData,
                   headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
@@ -781,7 +1074,7 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
                     style: pw.TextStyle(
                         fontSize: 20, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 16),
-                pw.Table.fromTextArray(
+                pw.TableHelper.fromTextArray(
                   headers: judgeHeaders,
                   data: judgeData,
                   headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
@@ -799,14 +1092,293 @@ class _JudgeScoresScreenState extends State<JudgeScoresScreen> {
         onLayout: (PdfPageFormat format) async => pdf.save(),
       );
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Results sent to printer')),
       );
     } catch (e) {
       debugPrint('Error printing scores: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to print scores: $e')),
       );
     }
   }
+}
+
+class _ScorePanel extends StatelessWidget {
+  const _ScorePanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.97),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white, width: 1.3),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x143034A8),
+            blurRadius: 26,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _EventHeaderText extends StatelessWidget {
+  const _EventHeaderText(this.text, {this.centered = false});
+
+  final String text;
+  final bool centered;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textAlign: centered ? TextAlign.center : TextAlign.start,
+      style: const TextStyle(
+        color: _ScorePalette.muted,
+        fontSize: 10,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.3,
+      ),
+    );
+  }
+}
+
+class _CountLabel extends StatelessWidget {
+  const _CountLabel({required this.icon, required this.count});
+
+  final IconData icon;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: _ScorePalette.primaryLight, size: 18),
+        const SizedBox(width: 7),
+        Text(
+          '$count',
+          style: const TextStyle(
+            color: _ScorePalette.ink,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ScoresAvailableBadge extends StatelessWidget {
+  const _ScoresAvailableBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE7F8EE),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.circle, color: _ScorePalette.success, size: 7),
+            SizedBox(width: 6),
+            Text(
+              'Scores available',
+              style: TextStyle(
+                color: Color(0xFF128848),
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultMetric extends StatelessWidget {
+  const _ResultMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.isSuccess = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isSuccess;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isSuccess ? _ScorePalette.success : _ScorePalette.primary;
+
+    return Container(
+      constraints: const BoxConstraints(minWidth: 220),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FF),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _ScorePalette.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color:
+                  isSuccess ? const Color(0xFFE7F8EE) : const Color(0xFFF0F1FF),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(icon, color: accent, size: 23),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: _ScorePalette.muted,
+                  fontSize: 11,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                value,
+                style: TextStyle(
+                  color: isSuccess ? accent : _ScorePalette.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RankBadge extends StatelessWidget {
+  const _RankBadge({required this.rank});
+
+  final int rank;
+
+  @override
+  Widget build(BuildContext context) {
+    final (background, foreground) = switch (rank) {
+      1 => (const Color(0xFFFFE8A3), const Color(0xFF9A6800)),
+      2 => (const Color(0xFFE5EAF2), const Color(0xFF56637A)),
+      3 => (const Color(0xFFF6DACB), const Color(0xFF9A5836)),
+      _ => (const Color(0xFFF0F1FF), _ScorePalette.primary),
+    };
+
+    return Container(
+      width: 30,
+      height: 30,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: background,
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        '$rank',
+        style: TextStyle(
+          color: foreground,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyScoresState extends StatelessWidget {
+  const _EmptyScoresState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 70),
+      child: Center(
+        child: Column(
+          children: [
+            Icon(
+              Icons.scoreboard_outlined,
+              color: _ScorePalette.primary,
+              size: 48,
+            ),
+            SizedBox(height: 14),
+            Text(
+              'No scores available',
+              style: TextStyle(
+                color: _ScorePalette.ink,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: 5),
+            Text(
+              'Events will appear here after judges submit scores.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _ScorePalette.muted,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScoreBackgroundOrb extends StatelessWidget {
+  const _ScoreBackgroundOrb({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Color(0x6698A7FF),
+      ),
+    );
+  }
+}
+
+class _ScorePalette {
+  const _ScorePalette._();
+
+  static const primary = Color(0xFF3034A8);
+  static const primaryLight = Color(0xFF4B50D7);
+  static const ink = Color(0xFF10183E);
+  static const muted = Color(0xFF69709A);
+  static const background = Color(0xFFF3F6FF);
+  static const border = Color(0xFFD5D9EE);
+  static const success = Color(0xFF18A957);
+  static const danger = Color(0xFFD92D38);
 }
