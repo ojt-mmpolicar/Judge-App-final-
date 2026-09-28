@@ -33,9 +33,10 @@ class _JudgeHomeScreenState extends State<JudgeHomeScreen> {
         _validateJudgeUsername(judgeUsername);
       } else {
         debugPrint('No judge username provided.');
-        setState(() {
-          isLoading = false;
-        });
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login',
+          (route) => false,
+        );
       }
     });
   }
@@ -634,7 +635,10 @@ class _JudgeHomeScreenState extends State<JudgeHomeScreen> {
     );
 
     if (shouldLogout == true && mounted) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
+      );
     }
   }
 

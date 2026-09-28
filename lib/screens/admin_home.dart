@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'create_event_screen.dart';
 import 'create_judge_screen.dart';
 import 'judge_scores_screen.dart';
-import 'login_screen.dart';
 import 'view_judges_screen.dart';
 
 class AdminHomeScreen extends StatefulWidget {
@@ -192,9 +191,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
 
     if (shouldLogOut == true && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute<void>(builder: (_) => const LoginScreen()),
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+        (route) => false,
       );
     }
   }

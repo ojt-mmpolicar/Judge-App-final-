@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +12,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
   static const _navy = Color(0xFF10183E);
   static const _indigo = Color(0xFF3034A8);
   static const _indigoLight = Color(0xFF4B50D7);
@@ -25,13 +28,51 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameFocusNode = FocusNode();
   final _passwordFocusNode = FocusNode();
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
+  late final AnimationController _orbAnimationController;
+  late final AnimationController _introAnimationController;
+  late final Animation<double> _cardFadeAnimation;
+  late final Animation<double> _cardScaleAnimation;
+  late final Animation<Offset> _cardSlideAnimation;
 
   _LoginView _view = _LoginView.roleSelection;
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    _orbAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 14),
+    )..repeat();
+    _introAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 760),
+    );
+    final introCurve = CurvedAnimation(
+      parent: _introAnimationController,
+      curve: Curves.easeOutCubic,
+    );
+    _cardFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _introAnimationController,
+        curve: const Interval(0, 0.72, curve: Curves.easeOut),
+      ),
+    );
+    _cardScaleAnimation = Tween<double>(begin: 0.965, end: 1).animate(
+      introCurve,
+    );
+    _cardSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.045),
+      end: Offset.zero,
+    ).animate(introCurve);
+    _introAnimationController.forward();
+  }
+
+  @override
   void dispose() {
+    _orbAnimationController.dispose();
+    _introAnimationController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _usernameFocusNode.dispose();
@@ -92,7 +133,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (snapshot.exists) {
-        Navigator.pushNamed(context, '/judge_home', arguments: username);
+        final judgeRoute = Uri(
+          path: '/judge_home',
+          queryParameters: {'username': username},
+        ).toString();
+        Navigator.pushNamed(context, judgeRoute, arguments: username);
       } else {
         _showMessage('Invalid username. Please contact the admin.');
       }
@@ -112,15 +157,123 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: const Color(0xFFF3F6FF),
       body: Stack(
         children: [
-          const Positioned(
+          Positioned(
             top: -150,
             right: -120,
-            child: _BackgroundOrb(size: 430),
+            child: AnimatedBuilder(
+              animation: _orbAnimationController,
+              child: const _BackgroundOrb(size: 430),
+              builder: (context, child) {
+                final angle = _orbAnimationController.value * math.pi * 2;
+                return Transform.translate(
+                  offset: Offset(
+                    math.sin(angle) * 34,
+                    math.cos(angle) * 22,
+                  ),
+                  child: Transform.scale(
+                    scale: 1 + (math.sin(angle) * 0.025),
+                    child: child,
+                  ),
+                );
+              },
+            ),
           ),
-          const Positioned(
+          Positioned(
             bottom: -210,
             left: -170,
-            child: _BackgroundOrb(size: 470),
+            child: AnimatedBuilder(
+              animation: _orbAnimationController,
+              child: const _BackgroundOrb(size: 470),
+              builder: (context, child) {
+                final angle =
+                    (_orbAnimationController.value * math.pi * 2) + math.pi;
+                return Transform.translate(
+                  offset: Offset(
+                    math.sin(angle) * 28,
+                    math.cos(angle) * 36,
+                  ),
+                  child: Transform.scale(
+                    scale: 1 + (math.cos(angle) * 0.02),
+                    child: child,
+                  ),
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: 92,
+            left: 72,
+            child: _FloatingBubble(
+              animation: _orbAnimationController,
+              size: 88,
+              phase: 0.2,
+              travelX: 18,
+              travelY: 25,
+              color: const Color(0xFF98A7FF),
+            ),
+          ),
+          Positioned(
+            top: 205,
+            left: 230,
+            child: _FloatingBubble(
+              animation: _orbAnimationController,
+              size: 52,
+              phase: 1.7,
+              travelX: 12,
+              travelY: 18,
+              color: const Color(0xFF98A7FF),
+              outlined: true,
+            ),
+          ),
+          Positioned(
+            top: 145,
+            right: 300,
+            child: _FloatingBubble(
+              animation: _orbAnimationController,
+              size: 66,
+              phase: 3.1,
+              travelX: 22,
+              travelY: 14,
+              color: const Color(0xFF98A7FF),
+            ),
+          ),
+          Positioned(
+            bottom: 280,
+            left: 105,
+            child: _FloatingBubble(
+              animation: _orbAnimationController,
+              size: 58,
+              phase: 4.3,
+              travelX: 15,
+              travelY: 22,
+              color: const Color(0xFF98A7FF),
+              outlined: true,
+            ),
+          ),
+          Positioned(
+            bottom: 115,
+            right: 88,
+            child: _FloatingBubble(
+              animation: _orbAnimationController,
+              size: 105,
+              phase: 2.4,
+              travelX: 25,
+              travelY: 19,
+              color: const Color(0xFF98A7FF),
+            ),
+          ),
+          Positioned(
+            bottom: 330,
+            right: 165,
+            child: _FloatingBubble(
+              animation: _orbAnimationController,
+              size: 46,
+              phase: 5.2,
+              travelX: 10,
+              travelY: 16,
+              color: const Color(0xFF98A7FF),
+              outlined: true,
+            ),
           ),
           SafeArea(
             child: LayoutBuilder(
@@ -140,7 +293,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 500),
-                        child: _buildLoginCard(),
+                        child: FadeTransition(
+                          opacity: _cardFadeAnimation,
+                          child: SlideTransition(
+                            position: _cardSlideAnimation,
+                            child: ScaleTransition(
+                              scale: _cardScaleAnimation,
+                              child: _buildLoginCard(),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -171,15 +333,42 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(30),
         child: Stack(
           children: [
-            const Positioned(
+            Positioned(
               top: -74,
               right: -74,
-              child: _CardDecoration(size: 168),
+              child: AnimatedBuilder(
+                animation: _orbAnimationController,
+                child: const _CardDecoration(size: 168),
+                builder: (context, child) {
+                  final angle = _orbAnimationController.value * math.pi * 2;
+                  return Transform.translate(
+                    offset: Offset(
+                      math.sin(angle) * 8,
+                      math.cos(angle) * 6,
+                    ),
+                    child: child,
+                  );
+                },
+              ),
             ),
-            const Positioned(
+            Positioned(
               bottom: -82,
               left: -82,
-              child: _CardDecoration(size: 175),
+              child: AnimatedBuilder(
+                animation: _orbAnimationController,
+                child: const _CardDecoration(size: 175),
+                builder: (context, child) {
+                  final angle =
+                      (_orbAnimationController.value * math.pi * 2) + math.pi;
+                  return Transform.translate(
+                    offset: Offset(
+                      math.sin(angle) * 7,
+                      math.cos(angle) * 9,
+                    ),
+                    child: child,
+                  );
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(38, 42, 38, 34),
@@ -189,7 +378,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildLockMark(),
+                    AnimatedBuilder(
+                      animation: _orbAnimationController,
+                      child: _buildLockMark(),
+                      builder: (context, child) {
+                        final angle =
+                            _orbAnimationController.value * math.pi * 2;
+                        return Transform.translate(
+                          offset: Offset(0, math.sin(angle) * 4),
+                          child: Transform.rotate(
+                            angle: math.sin(angle) * 0.018,
+                            child: child,
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 24),
                     const Text(
                       'Welcome to Judging App',
@@ -526,6 +729,55 @@ class _BackgroundOrb extends StatelessWidget {
         shape: BoxShape.circle,
         color: Color(0x6698A7FF),
       ),
+    );
+  }
+}
+
+class _FloatingBubble extends StatelessWidget {
+  const _FloatingBubble({
+    required this.animation,
+    required this.size,
+    required this.phase,
+    required this.travelX,
+    required this.travelY,
+    required this.color,
+    this.outlined = false,
+  });
+
+  final Animation<double> animation;
+  final double size;
+  final double phase;
+  final double travelX;
+  final double travelY;
+  final Color color;
+  final bool outlined;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withValues(alpha: 0.4),
+        ),
+      ),
+      builder: (context, child) {
+        final angle = (animation.value * math.pi * 2) + phase;
+        return Transform.translate(
+          offset: Offset(
+            math.sin(angle) * travelX,
+            math.cos(angle * 0.85) * travelY,
+          ),
+          child: Transform.scale(
+            scale: 1 +
+                (math.sin((angle * 1.2) + phase) * (outlined ? 0.055 : 0.07)),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }

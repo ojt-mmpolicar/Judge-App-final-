@@ -32,7 +32,24 @@ class JudgingApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/admin_home': (context) => const AdminHomeScreen(),
-        '/judge_home': (context) => const JudgeHomeScreen(),
+      },
+      onGenerateRoute: (settings) {
+        final uri = Uri.tryParse(settings.name ?? '');
+        if (uri?.path == '/judge_home') {
+          final routeUsername = settings.arguments is String
+              ? settings.arguments as String
+              : uri?.queryParameters['username'];
+
+          return MaterialPageRoute<void>(
+            settings: RouteSettings(
+              name: settings.name,
+              arguments: routeUsername,
+            ),
+            builder: (_) => const JudgeHomeScreen(),
+          );
+        }
+
+        return null;
       },
     );
   }
